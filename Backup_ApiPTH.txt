@@ -1,0 +1,117 @@
+import torch
+import torch.nn as nn
+import pandas as pd
+
+# Definir el modelo
+class TradingModel(nn.Module):
+    def __init__(self):
+        super(TradingModel, self).__init__()
+        self.fc1 = nn.Linear(18, 64)  # 18 entradas según `input_columns`
+        self.fc2 = nn.Linear(64, 32)
+        self.fc3 = nn.Linear(32, 1)
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x))
+        x = torch.tanh(self.fc3(x))
+        return x
+    
+input_columns = [
+    "precioopen5", "precioclose5", "preciohigh5", "preciolow5", "volume5",
+    "precioopen15", "precioclose15", "preciohigh15", "preciolow15", "volume15",
+    "rsi5", "rsi15", "iStochaMain5", "iStochaSign5", "iStochaMain15", "iStochaSign15",
+    "fill", "dif"  
+]
+
+# Cargar el modelo entrenado
+model = TradingModel()
+model.load_state_dict(torch.load('trading_model.pth'))
+model.eval()
+
+# Valores min y max para normalización (estos deben coincidir con los del entrenamiento)
+min_max_dict = {
+    "precioopen5": (1.04931, 1.05013),   # Cambia esto por los valores de tu dataset
+    "precioclose5": (1.04931, 1.05013),
+    "preciohigh5": (1.04931, 1.05013),
+    "preciolow5": (1.04931, 1.05013),
+    "volume5": (610, 995),
+    
+    "precioopen15": (1.04931, 1.05013),
+    "precioclose15": (1.04931, 1.05013),
+    "preciohigh15": (1.04931, 1.05013),
+    "preciolow15": (1.04931, 1.05013),
+    "volume15": (1461, 3005),
+
+    "rsi5": (0, 100),
+    "rsi15": (0, 100),
+    "iStochaMain5": (0, 100),
+    "iStochaSign5": (0, 100),
+    "iStochaMain15": (0, 100),
+    "iStochaSign15": (0, 100),
+
+    "fill": (0, 1)  # Ajustar según el dataset
+}
+
+# Función de normalización
+def normalize(value, min_val, max_val):
+    return (value - min_val) / (max_val - min_val) if max_val != min_val else 0
+
+# Entrada de datos en tiempo real
+def predict_single_data(data_dict):
+    """
+    Recibe un diccionario con los datos de entrada, normaliza y hace la predicción.
+    """
+
+    # Convertir a DataFrame temporal para procesar
+    df = pd.DataFrame([data_dict])
+
+    # Calcular "dif"
+    df['dif'] = abs(df['preciohigh5'] - df['preciolow5'])
+
+    # Si "dif" es menor a 0.0005, descartar el dato
+    if df['dif'].values[0] <= 0.0005:
+        return "Diferencia muy pequeña, dato descartado."
+
+    # Normalizar los valores
+    for col in min_max_dict:
+        df[col] = df[col].apply(lambda x: normalize(x, *min_max_dict[col]))
+
+    # Convertir a tensor
+    input_tensor = torch.tensor(df[input_columns].values, dtype=torch.float32)
+
+
+    # Hacer la predicción
+    prediction = model(input_tensor).item()
+
+    # Clasificación de la predicción
+    if prediction >= 0.1:
+        return "BUY"
+    elif prediction <= -0.1:
+        return "SELL"
+    else:
+        return "NEUTRAL"
+
+# Ejemplo de uso con un solo dato
+nuevo_dato = {
+    "precioopen5": 1.04803,
+    "precioclose5": 1.04814,
+    "preciohigh5": 1.04814,
+    "preciolow5": 1.04803,
+    "volume5": 75,
+    "precioopen15": 1.04803,
+    "precioclose15": 1.04822,
+    "preciohigh15": 1.04822,
+    "preciolow15": 1.04803,
+    "volume15": 111,
+    "rsi5": 29.36603256,
+    "rsi15": 23.96910783,
+    "iStochaMain5": 16.17647059,
+    "iStochaSign5": 19.61576774,
+    "iStochaMain15": 29.57486137,
+    "iStochaSign15": 39.71626395,
+    "fill": 0
+}
+
+resultado = predict_single_data(nuevo_dato)
+print(f"Predicción: {resultado}")
