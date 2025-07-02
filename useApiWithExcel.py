@@ -3,7 +3,7 @@ import requests
 from datetime import datetime
 
 # Ruta del archivo Excel con tus datos
-excel_path = r"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\DataFiles\Data_GBPAUD_Test.xlsx"
+excel_path = r"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_GBPAUD_Test.xlsx"
 
 # Cargar datos
 df = pd.read_excel(excel_path)

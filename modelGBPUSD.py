@@ -14,7 +14,7 @@ def normalize(column, min_val, max_val):
 
 # ====================== Carga y preprocesamiento ======================
 
-file_path = r'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\DataFiles\Datos_Entrenamiento_GBPUSD.xlsx'
+file_path = r'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Datos_Entrenamiento_GBPUSD.xlsx'
 data = pd.read_excel(file_path)
 data.columns = data.columns.str.strip()
 
@@ -60,6 +60,13 @@ data['profit_original'] = data['profit'].fillna(0)
 # Normalización de profit (target)
 min_profit = data['profit_original'].min()
 max_profit = data['profit_original'].max()
+
+print(f"MIN PROFIT ORIGINAL: {min_profit:.6f}")
+print(f"MAX PROFIT ORIGINAL: {max_profit:.6f}")
+
+print("DATOS PROFIT ORIGINAL: ", data['profit_original'])
+print("\nDATOS NORMALIZADOS ANTES DE AGREGAR:\n", normalize(data['profit_original'], min_profit, max_profit))
+
 data['profit'] = normalize(data['profit_original'], min_profit, max_profit)
 
 # ====================== Columnas de entrada ======================
@@ -145,6 +152,10 @@ min_max_dict = {
     "min_volume15": min_volume15,
     "max_volume15": max_volume15,
 }
+
+print(f"min_profit: {min_profit}")
+print(f"max_profit: {max_profit}")
+print(f"diff profit: {max_profit - min_profit}")
 
 with open("Trading_Model/min_max_GBPUSD.pkl", "wb") as f:
     pickle.dump(min_max_dict, f)

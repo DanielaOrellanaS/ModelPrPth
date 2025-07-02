@@ -3,16 +3,16 @@ import os
 
 # Variables globales para las rutas
 DOWNLOADS_PATH = r"C:\Users\user\Downloads"
-BASE_PATH = r"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\DataFiles"
+BASE_PATH = r"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles"
 
-TRANSFORMER_FILE = "transformer_GBPUSD_2025-06-25.csv"
-TX_FILE = "TX_GBPUSD_2025-06-25.csv"
+TRANSFORMER_FILE = "transformer_AUDUSD_2025-07-01.csv"
+TX_FILE = "TX_AUDUSD_2025-07-01.csv"
 
-FILE_TRANSFORMER_EXCEL = "transformer_GBPUSD_2025-06-25.xlsx"
-FILE_TX_EXCEL = "TX_GBPUSD_2025-06-25.xlsx"
-OUTPUT_FILE = "Data_GBPUSD_2025-06-25.xlsx"
+FILE_TRANSFORMER_EXCEL = "transformer_AUDUSD_2025-07-01.xlsx"
+FILE_TX_EXCEL = "TX_AUDUSD_2025-07-01.xlsx"
+OUTPUT_FILE = "Data_AUDUSD_2025-07-01.xlsx"
 
-FILE_DATA_PROFIT = "Data_GBPUSD_Test_NUEVO.xlsx"
+FILE_DATA_PROFIT = "Data_AUDUSD_Entrenamiento_Actual.xlsx"
 
 # Lista de archivos con rutas dinámicas
 archivos = [

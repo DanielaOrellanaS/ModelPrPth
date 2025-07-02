@@ -8,9 +8,9 @@ import numpy as np
 SYMBOL = "GBPUSD"
 MODEL_PATH = f"Trading_Model/trading_model_{SYMBOL}.pth"
 PKL_PATH = f"Trading_Model/min_max_{SYMBOL}.pkl"
-TEST_PATH = fr"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\DataFiles\Data_{SYMBOL}_Test.xlsx"
-OUTPUT_PATH = fr"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\Predicciones\Resultados_Test_{SYMBOL}.xlsx"
-MINIMO_GLOBAL = 0.0005  # umbral mínimo de profit
+TEST_PATH = fr"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_{SYMBOL}_Test.xlsx"
+OUTPUT_PATH = fr"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\Predicciones\Resultados_Test_{SYMBOL}.xlsx"
+MINIMO_GLOBAL = 0.0005 
 
 # =================== FUNCIONES ===================
 def normalize(x, min_val, max_val):
@@ -91,6 +91,15 @@ for i in range(len(df)):
 
     with torch.no_grad():
         output = model(entrada_tensor).item()  # profit normalizado
+    
+    # TEST SALIDAS 
+    print("Output raw del modelo:", output)
+    profit_real = denormalize(output, min_max["min_profit"], min_max["max_profit"])
+    print("Profit desnormalizado:", profit_real)
+
+    print("min_profit:", min_max["min_profit"])
+    print("max_profit:", min_max["max_profit"])
+    print("diff profit:", min_max["max_profit"] - min_max["min_profit"])
 
     profit_real = denormalize(output, min_max["min_profit"], min_max["max_profit"])
     tipo = calcular_operacion(profit_real, MINIMO_GLOBAL)

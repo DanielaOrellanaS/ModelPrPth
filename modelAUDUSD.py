@@ -14,7 +14,7 @@ def normalize(column, min_val, max_val):
 
 # ====================== Carga y preprocesamiento ======================
 
-file_path = r'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\DataFiles\Datos_Entrenamiento_AUDUSD.xlsx'
+file_path = r'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Datos_Entrenamiento_AUDUSD.xlsx'
 data = pd.read_excel(file_path)
 data.columns = data.columns.str.strip()
 
@@ -60,6 +60,13 @@ data['profit_original'] = data['profit'].fillna(0)
 # Normalización de profit (target)
 min_profit = data['profit_original'].min()
 max_profit = data['profit_original'].max()
+
+print(f"MIN PROFIT ORIGINAL: {min_profit:.6f}")
+print(f"MAX PROFIT ORIGINAL: {max_profit:.6f}")
+
+print("DATOS PROFIT ORIGINAL: ", data['profit_original'])
+print("\nDATOS NORMALIZADOS ANTES DE AGREGAR:\n", normalize(data['profit_original'], min_profit, max_profit))
+
 data['profit'] = normalize(data['profit_original'], min_profit, max_profit)
 
 # ====================== Columnas de entrada ======================
