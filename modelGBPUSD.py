@@ -14,7 +14,7 @@ def normalize(column, min_val, max_val):
 
 # ====================== Carga y preprocesamiento ======================
 
-file_path = r'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Datos_Entrenamiento_GBPUSD.xlsx'
+file_path = r'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Entrenamiento_GBPUSD.xlsx'
 data = pd.read_excel(file_path)
 data.columns = data.columns.str.strip()
 

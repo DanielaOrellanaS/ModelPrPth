@@ -5,13 +5,13 @@ import pickle
 import numpy as np
 
 # ============== Parámetro global ==============
-SYMBOL = "AUDUSD"  
+SYMBOL = "GBPAUD"  
 
 # ============== Configuración de rutas ==============
 MINIMO_GLOBAL = 0.0005
 model_path = f"Trading_Model/trading_model_{SYMBOL}.pth"
 minmax_path = f"Trading_Model/min_max_{SYMBOL}.pkl"
-test_path = fr'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_{SYMBOL}_Test.xlsx'
+test_path = fr'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Test_{SYMBOL}.xlsx'
 output_path = fr'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\Predicciones\Resultados_Test_{SYMBOL}.xlsx'
 
 # ============== Funciones utilitarias ==============
