@@ -5,14 +5,14 @@ import pickle
 import numpy as np
 
 # ============== Parámetro global ==============
-SYMBOL = "GBPAUD"  
+SYMBOL = "GBPUSD"  
 
 # ============== Configuración de rutas ==============
 MINIMO_GLOBAL = 0.0005
 model_path = f"Trading_Model/trading_model_{SYMBOL}.pth"
 minmax_path = f"Trading_Model/min_max_{SYMBOL}.pkl"
 test_path = fr'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Test_{SYMBOL}.xlsx'
-output_path = fr'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\Predicciones\Resultados_Test_{SYMBOL}.xlsx'
+output_path = fr'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\Predicciones\Data_Profit_Salida_{SYMBOL}.xlsx'
 
 # ============== Funciones utilitarias ==============
 def normalize(column, min_val, max_val):
@@ -92,6 +92,7 @@ input_columns = [
 # ============== Predicción ==============
 profit_pred = []
 tipo_pred = []
+profit_raw = []
 
 print(f"🔎 Procesando test para símbolo: {SYMBOL}")
 for i in range(len(df)):
@@ -100,7 +101,7 @@ for i in range(len(df)):
 
     with torch.no_grad():
         raw_output = model(input_tensor).item()
-
+    profit_raw.append(raw_output)
     profit = denormalize(raw_output, min_profit, max_profit)
     tipo = calcular_operacion(profit, MINIMO_GLOBAL)
 
@@ -115,7 +116,8 @@ for i in range(len(df)):
     print("-" * 50)
 
 # ============== Guardar resultados ==============
-df['profit_prediction'] = profit_pred
+df['profit_normalizado'] = profit_raw
+df['profit_desnormalizado'] = profit_pred
 df['tipo_prediction'] = tipo_pred
 
 # Eliminar columnas que no deben salir en el Excel

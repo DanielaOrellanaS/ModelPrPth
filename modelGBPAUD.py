@@ -188,3 +188,22 @@ for col_name in cols_normalizadas:
 
 wb.save(output_path)
 print(f"Archivo con datos normalizados guardado en: {output_path}")
+
+
+# ====================== Exportar archivo con columnas de profit ======================
+
+# Volvemos a leer el archivo original para mantener su estructura exacta
+original_data = pd.read_excel(file_path)
+original_data.columns = original_data.columns.str.strip()
+
+# Creamos las dos columnas adicionales
+original_data['profit_original'] = original_data['profit'].fillna(0)
+original_data['profit_normalizado'] = normalize(original_data['profit_original'], min_profit, max_profit)
+
+# Ruta de salida
+output_path = r"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Profit_Entrenamiento_GBPAUD.xlsx"
+
+# Guardar archivo con las dos columnas extra al final
+original_data.to_excel(output_path, index=False)
+
+print(f"\n✅ Archivo exportado con solo profit_original y profit_normalizado en:\n{output_path}")

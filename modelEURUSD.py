@@ -6,6 +6,7 @@ from torch.utils.data import Dataset, DataLoader
 import os
 import numpy as np
 import pickle
+import matplotlib.pyplot as plt
 
 # ====================== Normalización ======================
 
@@ -57,6 +58,7 @@ for col in ['rsi5', 'rsi15', 'iStochaMain5', 'iStochaSign5', 'iStochaMain15', 'i
 # Guardar profit real antes de normalizar
 data['profit_original'] = data['profit'].fillna(0)
 
+print("DATOS ORIGINALES PROFIT: ", data['profit_original'])
 # Normalización de profit (target)
 min_profit = data['profit_original'].min()
 max_profit = data['profit_original'].max()
@@ -155,3 +157,21 @@ min_max_dict = {
 
 with open("Trading_Model/min_max_EURUSD.pkl", "wb") as f:
     pickle.dump(min_max_dict, f)
+
+# ====================== Exportar archivo con columnas de profit ======================
+
+# Volvemos a leer el archivo original para mantener su estructura exacta
+original_data = pd.read_excel(file_path)
+original_data.columns = original_data.columns.str.strip()
+
+# Creamos las dos columnas adicionales
+original_data['profit_original'] = original_data['profit'].fillna(0)
+original_data['profit_normalizado'] = normalize(original_data['profit_original'], min_profit, max_profit)
+
+# Ruta de salida
+output_path = r"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Profit_Entrenamiento_EURUSD.xlsx"
+
+# Guardar archivo con las dos columnas extra al final
+original_data.to_excel(output_path, index=False)
+
+print(f"\n✅ Archivo exportado con solo profit_original y profit_normalizado en:\n{output_path}")

@@ -3,8 +3,8 @@ import requests
 from datetime import datetime
 
 # Ruta del archivo Excel con tus datos
-excel_path = r"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_GBPAUD_Test.xlsx"
-
+SYMBOL = "GBPAUD"  
+excel_path = fr'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Test_{SYMBOL}.xlsx'
 # Cargar datos
 df = pd.read_excel(excel_path)
 df.columns = df.columns.str.strip()
@@ -22,7 +22,7 @@ base_url = "http://localhost:8000/predict"
 # Recorrer filas
 for i, row in df.iterrows():
     params = {
-        "symbol": "GBPAUD",
+        "symbol": row["simbolo"],
         "fecha": row["fecha"],
         "o5": row["precioopen5"],
         "c5": row["precioclose5"],
@@ -51,7 +51,7 @@ for i, row in df.iterrows():
         if "error" in result:
             print("❌ Error:", result["error"])
         else:
-            print(f"✅ Profit: {result['profit']:.6f} | Tipo operación: {result['tipo_operacion']}")
+            print(f"✅ Profit: {result['valor_profit']:.6f} | Tipo operación: {result['RESULTADO']}")
         print("-" * 60)
     except Exception as e:
         print(f"❌ Error en la fila {i+1}: {e}")
