@@ -6,7 +6,6 @@ import urllib.parse as up
 import pickle
 import requests
 
-
 # === Configura tu símbolo y archivo ===
 symbol = "AUDUSD"  # Cambia este valor según el par
 fecha_archivo = "2025.07.07"
@@ -30,7 +29,7 @@ for i, row in df.iterrows():
         response = requests.get(url)
         result = response.json()
 
-        print(f"Fila {i+1} result: {result}")  # <- para ver qué devuelve en cada caso
+        print(f"Fila {i+1} result: {result}") 
         
         if "error" in result:
             df.at[i, "prediccion_modelo"] = "ERROR"

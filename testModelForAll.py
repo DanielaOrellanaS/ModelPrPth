@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 
 # ============== Parámetro global ==============
-SYMBOL = "GBPUSD"  
+SYMBOL = "EURUSD"  
 
 # ============== Configuración de rutas ==============
 MINIMO_GLOBAL = 0.0005
@@ -49,6 +49,7 @@ model.eval()
 # ============== Cargar min/max ==============
 with open(minmax_path, "rb") as f:
     min_max = pickle.load(f)
+    print(min_max)
 
 min_profit = min_max["min_profit"]
 max_profit = min_max["max_profit"]
@@ -108,12 +109,12 @@ for i in range(len(df)):
     profit_pred.append(profit)
     tipo_pred.append(tipo)
 
-    print(f"Registro {i+1:02d} | Fecha: {df.loc[i, 'fecha']}")
+    """ print(f"Registro {i+1:02d} | Fecha: {df.loc[i, 'fecha']}")
     print(f"  Input normalizado: {input_vals}")
     print(f"  Output raw: {raw_output:.6f}")
     print(f"  Profit (desnormalizado): {profit:.6f}")
     print(f"  Tipo de operación: {tipo}")
-    print("-" * 50)
+    print("-" * 50) """
 
 # ============== Guardar resultados ==============
 df['profit_normalizado'] = profit_raw

@@ -16,7 +16,7 @@ df['fecha'] = df['fecha'].str.replace(',', '-', regex=False)
 df['fecha'] = pd.to_datetime(df['fecha'], format="%Y-%m-%d %H:%M")
 df['fecha'] = df['fecha'].dt.strftime("%Y-%m-%dT%H:%M")  # Formato ISO para URL
 
-# URL base del endpoint (cambia si usas Render o dominio externo)
+# URL base del endpoint
 base_url = "http://localhost:8000/predict"
 
 # Recorrer filas

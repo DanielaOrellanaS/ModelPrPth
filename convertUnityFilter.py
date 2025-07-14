@@ -59,7 +59,7 @@ df_tx = pd.read_excel(file_tx)
 # Eliminar espacios extra en los nombres de las columnas
 df_tx.columns = df_tx.columns.str.strip()
 
-# Contar registros
+# Contar registros (test)
 total_transformer = len(df_transformer)
 total_tx = len(df_tx)
 print(f"Número de registros transformer: {total_transformer}")
