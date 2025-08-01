@@ -5,14 +5,14 @@ import os
 DOWNLOADS_PATH = r"C:\Users\user\Downloads"
 BASE_PATH = r"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles"
 
-TRANSFORMER_FILE = "transformer_AUDUSD_2025-07-08.csv"
-TX_FILE = "TX_AUDUSD_2025-07-08.csv"
+TRANSFORMER_FILE = "transformer_GER40_2025-07-30.csv"
+TX_FILE = "TX_GER40_2025-07-31.csv"
 
-FILE_TRANSFORMER_EXCEL = "transformer_AUDUSD_2025-07-08.xlsx"
-FILE_TX_EXCEL = "TX_AUDUSD_2025-07-08.xlsx"
-OUTPUT_FILE = "Data_AUDUSD_2025-07-08.xlsx"
+FILE_TRANSFORMER_EXCEL = "transformer_GER40_2025-07-30.xlsx"
+FILE_TX_EXCEL = "TX_GER40_2025-07-31.xlsx"
+OUTPUT_FILE = "Data_GER40_2025-07-30.xlsx"
 
-FILE_DATA_PROFIT = "Data_Test_AUDUSD.xlsx"
+FILE_DATA_PROFIT = "Data_Entrenamiento_GER40.xlsx"
 
 # Lista de archivos con rutas dinámicas
 archivos = [

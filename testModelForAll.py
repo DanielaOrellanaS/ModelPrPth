@@ -5,10 +5,10 @@ import pickle
 import numpy as np
 
 # ============== Parámetro global ==============
-SYMBOL = "EURUSD"  
+SYMBOL = "BTCUSD"  
 
 # ============== Configuración de rutas ==============
-MINIMO_GLOBAL = 0.0005
+MINIMO_GLOBAL = 600
 model_path = f"Trading_Model/trading_model_{SYMBOL}.pth"
 minmax_path = f"Trading_Model/min_max_{SYMBOL}.pkl"
 test_path = fr'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Test_{SYMBOL}.xlsx'
@@ -71,12 +71,12 @@ df['minuto'] = df['fecha'].dt.minute / 55.0
 # Normalización precios 5min
 for col in ['precioopen5', 'precioclose5', 'preciohigh5', 'preciolow5']:
     df[col] = normalize(df[col], min_precio5, max_precio5)
-df['volume5'] = normalize(df['volume5'], df['volume5'].min(), df['volume5'].max())
+df['volume5'] = normalize(df['volume5'], min_max["min_volume5"], min_max["max_volume5"])
 
 # Normalización precios 15min
 for col in ['precioopen15', 'precioclose15', 'preciohigh15', 'preciolow15']:
     df[col] = normalize(df[col], min_precio15, max_precio15)
-df['volume15'] = normalize(df['volume15'], df['volume15'].min(), df['volume15'].max())
+df['volume15'] = normalize(df['volume15'], min_max["min_volume15"], min_max["max_volume15"])
 
 # Normalización indicadores
 for col in ['rsi5', 'rsi15', 'iStochaMain5', 'iStochaSign5', 'iStochaMain15', 'iStochaSign15']:
@@ -90,6 +90,12 @@ input_columns = [
     "rsi5", "rsi15", "iStochaMain5", "iStochaSign5", "iStochaMain15", "iStochaSign15"
 ]
 
+print("📊 Verificación de columnas normalizadas:")
+
+for col in input_columns:
+    min_val = df[col].min()
+    max_val = df[col].max()
+    print(f"  {col:<20} ➜ Min: {min_val:.4f}, Max: {max_val:.4f}")
 # ============== Predicción ==============
 profit_pred = []
 tipo_pred = []
@@ -109,12 +115,12 @@ for i in range(len(df)):
     profit_pred.append(profit)
     tipo_pred.append(tipo)
 
-    """ print(f"Registro {i+1:02d} | Fecha: {df.loc[i, 'fecha']}")
+    print(f"Registro {i+1:02d} | Fecha: {df.loc[i, 'fecha']}")
     print(f"  Input normalizado: {input_vals}")
     print(f"  Output raw: {raw_output:.6f}")
     print(f"  Profit (desnormalizado): {profit:.6f}")
     print(f"  Tipo de operación: {tipo}")
-    print("-" * 50) """
+    print("-" * 50)
 
 # ============== Guardar resultados ==============
 df['profit_normalizado'] = profit_raw

@@ -6,8 +6,6 @@ from torch.utils.data import Dataset, DataLoader
 import os
 import numpy as np
 import pickle
-from openpyxl import load_workbook
-from openpyxl.styles import PatternFill
 
 # ====================== Normalización ======================
 
@@ -16,7 +14,7 @@ def normalize(column, min_val, max_val):
 
 # ====================== Carga y preprocesamiento ======================
 
-file_path = r'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Entrenamiento_GBPAUD.xlsx'
+file_path = r'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Entrenamiento_US30.xlsx'
 data = pd.read_excel(file_path)
 data.columns = data.columns.str.strip()
 
@@ -62,11 +60,12 @@ data['profit_original'] = data['profit'].fillna(0)
 # Normalización de profit (target)
 min_profit = data['profit_original'].min()
 max_profit = data['profit_original'].max()
+
 print(f"MIN PROFIT ORIGINAL: {min_profit:.6f}")
 print(f"MAX PROFIT ORIGINAL: {max_profit:.6f}")
 
 print("DATOS PROFIT ORIGINAL: ", data['profit_original'])
-print("DATOS NORMALIZADOS ANTES DE AGREGAR: ", normalize(data['profit_original'], min_profit, max_profit))
+print("\nDATOS NORMALIZADOS ANTES DE AGREGAR:\n", normalize(data['profit_original'], min_profit, max_profit))
 
 data['profit'] = normalize(data['profit_original'], min_profit, max_profit)
 
@@ -79,6 +78,31 @@ input_columns = [
     "precioopen15", "precioclose15", "preciohigh15", "preciolow15", "volume15",
     "rsi5", "rsi15", "iStochaMain5", "iStochaSign5", "iStochaMain15", "iStochaSign15"
 ]
+
+# ====================== Normalización de nuevos indicadores ======================
+
+# Lista de columnas nuevas para normalizar con min-max
+new_columns_minmax = [
+    'ema550', 'ema5200', 'ema50_prev', 'ema5200_prev',
+    'macdLine5', 'signalLine5', 'macdLine_prev5', 'signalLine_prev5',
+    'adx5', 'diPlus5', 'diMinus5',
+    'ema5015', 'ema20015', 'ema50_prev15', 'ema200_prev15',
+    'macdLine15', 'signalLine15', 'macdLine_prev15', 'signalLine_prev15',
+    'adx15', 'diPlus15', 'diMinus15'
+]
+
+# Diccionario para guardar sus min/max
+min_max_extra = {}
+
+# Normalizar y guardar sus min/max
+for col in new_columns_minmax:
+    min_val = data[col].min()
+    max_val = data[col].max()
+    data[col] = normalize(data[col], min_val, max_val)
+    min_max_extra[f"min_{col}"] = min_val
+    min_max_extra[f"max_{col}"] = max_val
+
+input_columns += new_columns_minmax
 
 # ====================== Dataset ======================
 
@@ -121,7 +145,7 @@ model = TradingModel()
 criterion = nn.SmoothL1Loss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-epochs = 10
+epochs = 50
 for epoch in range(epochs):
     total_loss = 0.0
     for X_batch, y_batch in dataloader:
@@ -136,7 +160,7 @@ for epoch in range(epochs):
 # ====================== Guardado del modelo ======================
 
 os.makedirs("Trading_Model", exist_ok=True)
-torch.save(model.state_dict(), "Trading_Model/trading_model_GBPAUD.pth")
+torch.save(model.state_dict(), "Trading_Model/trading_model_US30.pth")
 
 # Guardar min/max para normalización/desnormalización posterior
 
@@ -154,40 +178,14 @@ min_max_dict = {
     "max_volume15": max_volume15,
 }
 
-with open("Trading_Model/min_max_GBPAUD.pkl", "wb") as f:
+print(f"min_profit: {min_profit}")
+print(f"max_profit: {max_profit}")
+print(f"diff profit: {max_profit - min_profit}")
+
+min_max_dict.update(min_max_extra)
+
+with open("Trading_Model/min_max_US30.pkl", "wb") as f:
     pickle.dump(min_max_dict, f)
-
-# Guardar Excel con todos los datos normalizados
-output_path = r"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Datos_Entrenamiento_GBPAUD_Normalizado.xlsx"
-data.to_excel(output_path, index=False)
-
-# === Pintar celdas normalizadas ===
-wb = load_workbook(output_path)
-ws = wb.active
-
-# Color rosa personalizado (#D42CA8)
-fill = PatternFill(start_color="D42CA8", end_color="D42CA8", fill_type="solid")
-
-# Pintar columnas que fueron normalizadas
-cols_normalizadas = [
-    'dia_semana', 'hora', 'minuto',
-    'precioopen5', 'precioclose5', 'preciohigh5', 'preciolow5',
-    'volume5',
-    'precioopen15', 'precioclose15', 'preciohigh15', 'preciolow15',
-    'volume15',
-    'rsi5', 'rsi15',
-    'iStochaMain5', 'iStochaSign5', 'iStochaMain15', 'iStochaSign15',
-    'profit'
-]
-
-for col_name in cols_normalizadas:
-    if col_name in data.columns:
-        col_idx = list(data.columns).index(col_name) + 1  # Excel usa 1-based indexing
-        for row in range(2, ws.max_row + 1):  # desde fila 2 (sin cabecera)
-            ws.cell(row=row, column=col_idx).fill = fill
-
-wb.save(output_path)
-print(f"Archivo con datos normalizados guardado en: {output_path}")
 
 
 # ====================== Exportar archivo con columnas de profit ======================
@@ -201,13 +199,16 @@ original_data['profit_original'] = original_data['profit'].fillna(0)
 original_data['profit_normalizado'] = normalize(original_data['profit_original'], min_profit, max_profit)
 
 # Ruta de salida
-output_path = r"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Profit_Entrenamiento_GBPAUD.xlsx"
+output_path = r"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Profit_Entrenamiento_US30.xlsx"
 
 # Guardar archivo con las dos columnas extra al final
 original_data.to_excel(output_path, index=False)
 
 print(f"\n✅ Archivo exportado con solo profit_original y profit_normalizado en:\n{output_path}")
 
-print("Cantidad total:", len(data))
-print("Cantidad con profit ≠ 0:", len(data[data['profit_original'] != 0]))
-print("Porcentaje con señales reales:", 100 * len(data[data['profit_original'] != 0]) / len(data))
+model.eval()
+with torch.no_grad():
+    muestra = torch.tensor(dataset.X[:10], dtype=torch.float32)
+    predicciones = model(muestra)
+    print("Predicciones:", predicciones.numpy().flatten())
+    print("Reales:", dataset.y[:10].flatten())
