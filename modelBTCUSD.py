@@ -120,6 +120,19 @@ model = TradingModel()
 criterion = nn.SmoothL1Loss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
+for X_batch, y_batch in dataloader:
+    optimizer.zero_grad()
+    output = model(X_batch)
+    
+    loss_raw = criterion(output, y_batch)  # (batch_size, 1)
+    
+    # Crear pesos: 1.0 para neutros, mayor para no-neutros
+    weights = torch.where(y_batch != 0, torch.tensor(3.0), torch.tensor(1.0))
+    loss = (loss_raw * weights).mean()
+    
+    loss.backward()
+    optimizer.step()
+
 epochs = 50
 for epoch in range(epochs):
     total_loss = 0.0

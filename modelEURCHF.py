@@ -14,7 +14,7 @@ def normalize(column, min_val, max_val):
 
 # ====================== Carga y preprocesamiento ======================
 
-file_path = r'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Entrenamiento_GER40.xlsx'
+file_path = r'C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Entrenamiento_EURCHF.xlsx'
 data = pd.read_excel(file_path)
 data.columns = data.columns.str.strip()
 
@@ -58,35 +58,13 @@ for col in ['rsi5', 'rsi15', 'iStochaMain5', 'iStochaSign5', 'iStochaMain15', 'i
 data['profit_original'] = data['profit'].fillna(0)
 
 # Normalización de profit (target)
-# Convertir profit a numérico y limpiar
-data['profit'] = pd.to_numeric(data['profit'], errors='coerce').fillna(0)
 min_profit = data['profit_original'].min()
 max_profit = data['profit_original'].max()
-print(min_profit, max_profit)
 
-# IMPRESIONES DE PRUEBA 
-# ====================== Debug de normalización/desnormalización ======================
-def denormalize(column, min_val, max_val):
-    return column * (max_val - min_val) + min_val
-
-# Crear un DataFrame comparativo
-debug_df = pd.DataFrame({
-    "profit_original": data['profit_original'],
-    "profit_normalizado": normalize(data['profit_original'], min_profit, max_profit),
-    "profit_desnormalizado": denormalize(normalize(data['profit_original'], min_profit, max_profit), min_profit, max_profit)
-})
-
-# Calcular error entre original y desnormalizado
-debug_df["error"] = debug_df["profit_original"] - debug_df["profit_desnormalizado"]
-
-print("\n=== Debug Normalización / Desnormalización ===")
-print(debug_df.head(20))
-print(f"\nError absoluto medio: {debug_df['error'].abs().mean():.10f}")
 print(f"MIN PROFIT ORIGINAL: {min_profit:.6f}")
 print(f"MAX PROFIT ORIGINAL: {max_profit:.6f}")
 
 print("DATOS PROFIT ORIGINAL: ", data['profit_original'])
-
 print("\nDATOS NORMALIZADOS ANTES DE AGREGAR:\n", normalize(data['profit_original'], min_profit, max_profit))
 
 data['profit'] = normalize(data['profit_original'], min_profit, max_profit)
@@ -101,43 +79,7 @@ input_columns = [
     "rsi5", "rsi15", "iStochaMain5", "iStochaSign5", "iStochaMain15", "iStochaSign15"
 ]
 
-# ====================== Normalización de nuevos indicadores ======================
-
-# Lista de columnas nuevas para normalizar con min-max
-new_columns_minmax = [
-    'ema550', 'ema5200', 'ema50_prev', 'ema5200_prev',
-    'macdLine5', 'signalLine5', 'macdLine_prev5', 'signalLine_prev5',
-    'adx5', 'diPlus5', 'diMinus5',
-    'ema5015', 'ema20015', 'ema50_prev15', 'ema200_prev15',
-    'macdLine15', 'signalLine15', 'macdLine_prev15', 'signalLine_prev15',
-    'adx15', 'diPlus15', 'diMinus15'
-]
-
-# Diccionario para guardar sus min/max
-min_max_extra = {}
-
-for col in new_columns_minmax:
-    min_val = data[col].min()
-    max_val = data[col].max()
-    print(f"\n>>> Normalizando {col}: min={min_val}, max={max_val}")
-    print("Valores antes:", data[col].head())
-    data[col] = normalize(data[col], min_val, max_val)
-    print("Valores después:", data[col].head())
-    min_max_extra[f"min_{col}"] = min_val
-    min_max_extra[f"max_{col}"] = max_val
-
-input_columns += new_columns_minmax
-
-print("\n=== Columnas de entrada finales ===")
-print(input_columns)
-
 # ====================== Dataset ======================
-
-print("\n=== Primeras filas del dataset X ===")
-print(data[input_columns].head())
-
-print("\n=== Primeras filas de target (profit normalizado) ===")
-print(data['profit'].head())
 
 class TradingDataset(Dataset):
     def __init__(self, df):
@@ -174,30 +116,17 @@ class TradingModel(nn.Module):
 dataset = TradingDataset(data)
 dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
 
-print(f"\nDataset tamaño: {len(dataset)} muestras")
-print(f"Input shape: {dataset.X.shape}")
-print(f"Target shape: {dataset.y.shape}")
-
 model = TradingModel()
-#criterion = nn.SmoothL1Loss()
+criterion = nn.SmoothL1Loss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 epochs = 50
-criterion = nn.SmoothL1Loss(reduction='none')
-
 for epoch in range(epochs):
     total_loss = 0.0
     for X_batch, y_batch in dataloader:
         optimizer.zero_grad()
         output = model(X_batch)
-
-        # pérdida sin reducción
-        loss_raw = criterion(output, y_batch)
-
-        # peso mayor para profits no cero
-        weights = torch.where(y_batch != 0, torch.tensor(5.0), torch.tensor(1.0))
-        loss = (loss_raw * weights).mean()
-
+        loss = criterion(output, y_batch)
         loss.backward()
         optimizer.step()
         total_loss += loss.item()
@@ -206,7 +135,7 @@ for epoch in range(epochs):
 # ====================== Guardado del modelo ======================
 
 os.makedirs("Trading_Model", exist_ok=True)
-torch.save(model.state_dict(), "Trading_Model/trading_model_GER40.pth")
+torch.save(model.state_dict(), "Trading_Model/trading_model_EURCHF.pth")
 
 # Guardar min/max para normalización/desnormalización posterior
 
@@ -228,10 +157,9 @@ print(f"min_profit: {min_profit}")
 print(f"max_profit: {max_profit}")
 print(f"diff profit: {max_profit - min_profit}")
 
-min_max_dict.update(min_max_extra)
-
-with open("Trading_Model/min_max_GER40.pkl", "wb") as f:
+with open("Trading_Model/min_max_EURCHF.pkl", "wb") as f:
     pickle.dump(min_max_dict, f)
+
 
 # ====================== Exportar archivo con columnas de profit ======================
 
@@ -244,16 +172,9 @@ original_data['profit_original'] = original_data['profit'].fillna(0)
 original_data['profit_normalizado'] = normalize(original_data['profit_original'], min_profit, max_profit)
 
 # Ruta de salida
-output_path = r"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Profit_Entrenamiento_GER40.xlsx"
+output_path = r"C:\Users\user\OneDrive\Documentos\Trading\ModelPrPth\ModelAndTest\DataFiles\Data_Profit_Entrenamiento_EURCHF.xlsx"
 
 # Guardar archivo con las dos columnas extra al final
 original_data.to_excel(output_path, index=False)
 
 print(f"\n✅ Archivo exportado con solo profit_original y profit_normalizado en:\n{output_path}")
-
-model.eval()
-with torch.no_grad():
-    muestra = torch.tensor(dataset.X[:10], dtype=torch.float32)
-    predicciones = model(muestra)
-    print("Predicciones:", predicciones.numpy().flatten())
-    print("Reales:", dataset.y[:10].flatten())
